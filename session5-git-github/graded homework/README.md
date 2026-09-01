@@ -27,3 +27,5 @@ Cherry-picked a single commit from `test2` branch into `test1` branch.
 ![alt text](image-4.png)
 
 ### Files in `test1` after cherry-pick:
+![alt text](image-5.png)
+> Only the cherry-picked file (payment.txt) from `test2` is present in `test1`, confirming that the cherry-pick operation was successful.
