@@ -3,8 +3,8 @@ variable "aws_region" {
   description = "AWS region where the S3 bucket will be created."
   default     = "ap-south-1"
 }
+
 variable "bucket_name" {
   type        = string
-  description = "Name of the S3 bucket."
-  default     = "lava250506"
+  description = "Globally unique name of the S3 bucket."
 }

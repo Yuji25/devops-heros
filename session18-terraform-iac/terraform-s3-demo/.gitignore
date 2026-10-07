@@ -21,3 +21,6 @@ override.tf.json
 .idea/
 .vscode/
 .DS_Store
+
+# Required non-secret classroom variable file
+!terraform.tfvars
