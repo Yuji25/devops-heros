@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: l17-devsecops
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: l17-devsecops
+  template:
+    metadata:
+      labels:
+        app: l17-devsecops
+    spec:
+      containers:
+        - name: l17-devsecops
+          image: l17-devsecops:__IMAGE_TAG__
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5001
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5001
+            initialDelaySeconds: 2
+            periodSeconds: 2

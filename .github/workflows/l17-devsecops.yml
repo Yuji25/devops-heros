@@ -1,0 +1,204 @@
+name: Lecture 17 DevSecOps Pipeline
+
+on:
+  push:
+    branches:
+      - L17_DevSecOps
+    paths:
+      - "session-17-devsecops/graded-homework/devsecops-demo/**"
+      - ".github/workflows/l17-devsecops.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+  security-events: write
+
+jobs:
+  devsecops:
+    name: Complete DevSecOps Pipeline
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: session-17-devsecops/graded-homework/devsecops-demo
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies and security tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+          pip install pip-audit detect-secrets
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: python
+
+      - name: Application Build Check
+        run: |
+          python -m compileall app
+          echo "Application build check passed"
+
+      - name: Unit Tests
+        run: |
+          pytest --cov=app --cov-report=term-missing
+
+      - name: SAST - CodeQL
+        uses: github/codeql-action/analyze@v3
+
+      - name: SCA - Dependency Scan
+        run: |
+          pip-audit -r requirements.txt
+
+      - name: Secret Scan
+        run: |
+          detect-secrets scan \
+            app tests k8s Dockerfile requirements.txt requirements-dev.txt \
+            > secret-scan.json
+
+          python - <<'PY'
+          import json
+
+          with open("secret-scan.json") as f:
+              report = json.load(f)
+
+          count = sum(len(items) for items in report.get("results", {}).values())
+
+          print(f"Potential secrets found: {count}")
+
+          if count != 0:
+              raise SystemExit("Secret scanning gate failed")
+
+          print("Secret scanning passed")
+          PY
+
+      - name: Build Docker Image
+        run: |
+          docker build -t l17-devsecops:${GITHUB_SHA} .
+
+      - name: Container Image Scan - Trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: "l17-devsecops:${{ github.sha }}"
+          format: "table"
+          severity: "CRITICAL"
+          ignore-unfixed: true
+          exit-code: "1"
+
+      - name: Security Gate
+        run: |
+          echo "===================================="
+          echo "SECURITY GATE PASSED"
+          echo "Unit Tests       : PASSED"
+          echo "SAST             : PASSED"
+          echo "SCA              : PASSED"
+          echo "Secret Scan      : PASSED"
+          echo "Container Scan   : PASSED"
+          echo "===================================="
+
+      - name: Generate GHCR Image Name
+        id: image
+        run: |
+          OWNER=$(echo "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')
+          echo "name=ghcr.io/${OWNER}/l17-devsecops" >> "$GITHUB_OUTPUT"
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push Image to Registry
+        run: |
+          docker tag \
+            l17-devsecops:${GITHUB_SHA} \
+            "${{ steps.image.outputs.name }}:${GITHUB_SHA}"
+
+          docker tag \
+            l17-devsecops:${GITHUB_SHA} \
+            "${{ steps.image.outputs.name }}:latest"
+
+          docker push "${{ steps.image.outputs.name }}:${GITHUB_SHA}"
+          docker push "${{ steps.image.outputs.name }}:latest"
+
+          echo "Image pushed successfully:"
+          echo "${{ steps.image.outputs.name }}:${GITHUB_SHA}"
+
+      - name: Create Kubernetes Cluster
+        uses: helm/kind-action@v1.10.0
+
+      - name: Load Scanned Image into Kubernetes
+        run: |
+          CLUSTER=$(kind get clusters | head -n 1)
+          echo "Kind cluster: ${CLUSTER}"
+
+          kind load docker-image \
+            l17-devsecops:${GITHUB_SHA} \
+            --name "${CLUSTER}"
+
+      - name: Prepare Kubernetes Manifest
+        run: |
+          sed -i \
+            "s|__IMAGE_TAG__|${GITHUB_SHA}|g" \
+            k8s/deployment.yaml
+
+          grep "image:" k8s/deployment.yaml
+
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/service.yaml
+
+          kubectl rollout status \
+            deployment/l17-devsecops \
+            --timeout=120s
+
+      - name: Verify Kubernetes Deployment
+        run: |
+          echo "=== PODS ==="
+          kubectl get pods -l app=l17-devsecops -o wide
+
+          echo "=== DEPLOYMENT ==="
+          kubectl get deployment l17-devsecops
+
+          echo "=== SERVICE ==="
+          kubectl get service l17-devsecops
+
+      - name: Test Deployed Application
+        run: |
+          kubectl port-forward service/l17-devsecops 5017:80 \
+            >/tmp/l17-port-forward.log 2>&1 &
+
+          PF_PID=$!
+
+          SUCCESS=0
+
+          for i in {1..20}; do
+            if RESPONSE=$(curl -fsS http://127.0.0.1:5017/health); then
+              echo "=== APPLICATION HEALTH ==="
+              echo "${RESPONSE}"
+              SUCCESS=1
+              break
+            fi
+
+            sleep 1
+          done
+
+          kill ${PF_PID} 2>/dev/null || true
+
+          if [ "${SUCCESS}" -ne 1 ]; then
+            cat /tmp/l17-port-forward.log
+            exit 1
+          fi
+
+          echo "Kubernetes deployment verification passed"

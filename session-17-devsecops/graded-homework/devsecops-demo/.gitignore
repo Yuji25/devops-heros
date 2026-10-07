@@ -1,0 +1,6 @@
+.venv/
+.venv-l17/
+__pycache__/
+.pytest_cache/
+.coverage
+secret-scan.json
