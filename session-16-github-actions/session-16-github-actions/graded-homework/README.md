@@ -329,8 +329,8 @@ docker images l16-calculator:local
 ```
 
 **Screenshot:**
-> ![alt text](image.png)
-> ![alt text](image-1.png)
+> ![alt text](screenshots/image.png)
+> ![alt text](screenshots/image-1.png)
 
 ---
 
@@ -364,29 +364,7 @@ git log -1 --oneline
 # GitHub Actions Pipeline Result
 
 ### GitHub Screenshot 1 — Workflow Run
-
-This screenshot is **not from the terminal**.
-
-After pushing:
-
-1. Open the repository on GitHub.
-2. Open the **Actions** tab.
-3. Select **Lecture 16 CI/CD Pipeline**.
-4. Open the latest run.
-5. Wait until the complete workflow becomes green.
-
-The successful pipeline should show:
-
-```text
-✓ Test Application
-✓ Security Check
-✓ Build Application
-✓ CD - Package Docker Image
-```
-
-**Screenshot:** Take a screenshot of this complete GitHub Actions run with all four jobs green.
-
-> ![Successful CI CD Pipeline](screenshots/github-actions-success.png)
+![alt text](screenshots/image-2.png)
 
 ---
 
@@ -434,20 +412,7 @@ The resulting Docker image artifact is ready to be downloaded and deployed to a 
 
 ### GitHub Screenshot 2 — Artifacts
 
-This screenshot is also **from GitHub, not the terminal**.
-
-On the successful workflow run page, scroll to the **Artifacts** section.
-
-It should contain:
-
-```text
-calculator-build
-calculator-docker-image
-```
-
-**Screenshot:** Take a screenshot showing both artifacts.
-
-> ![GitHub Actions Artifacts](screenshots/github-actions-artifacts.png)
+![alt text](screenshots/image-3.png)
 
 ---
 
@@ -455,27 +420,7 @@ calculator-docker-image
 
 ### GitHub Screenshot 3 — CD Job
 
-Open:
-
-```text
-Actions
-→ Lecture 16 CI/CD Pipeline
-→ latest successful run
-→ CD - Package Docker Image
-```
-
-The job should show successful steps for:
-
-```text
-Build Docker image
-Test Docker image
-Package Docker image
-Upload Docker delivery artifact
-```
-
-**Screenshot:** Take one screenshot showing these steps with green check marks.
-
-> ![CD Job](screenshots/github-actions-cd-job.png)
+![alt text](screenshots/image-4.png)
 
 ---
 
@@ -548,7 +493,7 @@ The pipeline runs automatically after a push and produces tested application and
 
 There are **no Kubernetes resources to clean for this lecture**.
 
-Only remove the local Docker image after taking your terminal screenshot:
+Hence I only removed the local Docker image.
 
 ```bash id="g2m9be"
 echo "=== CLEANING LOCAL LECTURE 16 IMAGE ==="
@@ -559,5 +504,3 @@ echo ""
 echo "=== CLEANUP COMPLETE ==="
 docker images l16-calculator:local
 ```
-
-The final `docker images` output should simply show no `l16-calculator:local` image.
