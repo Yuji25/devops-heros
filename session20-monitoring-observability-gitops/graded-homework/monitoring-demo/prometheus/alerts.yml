@@ -1,0 +1,16 @@
+groups:
+  - name: lecture20-alerts
+    rules:
+      - alert: Lecture20DemoAlert
+        expr: vector(1)
+        labels:
+          severity: demo
+        annotations:
+          summary: Lecture 20 alert demonstration
+
+      - alert: ApplicationDown
+        expr: up{job="demo-app"} == 0
+        labels:
+          severity: critical
+        annotations:
+          summary: Lecture 20 demo application is down
