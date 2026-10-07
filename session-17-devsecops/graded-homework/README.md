@@ -464,8 +464,8 @@ echo "=== LOCAL VERIFICATION COMPLETE ==="
 ```
 
 **Screenshot:**
-> ![alt text](image.png)
-> ![alt text](image-1.png)
+> ![alt text](screenshots/image.png)
+> ![alt text](screenshots/image-1.png)
 
 ---
 
@@ -630,19 +630,7 @@ git log -1 --oneline
 
 ## GitHub Screenshot 1 — Successful Workflow
 
-**This screenshot must be taken from GitHub, not the terminal.**
-
-After pushing:
-
-1. Open the repository on GitHub.
-2. Open **Actions**.
-3. Select **Lecture 17 DevSecOps Pipeline**.
-4. Open the latest run.
-5. Wait until `Complete DevSecOps Pipeline` is green.
-
-**Screenshot:** Take one screenshot showing the successful workflow run.
-
-> ![Successful DevSecOps Pipeline](screenshots/github-pipeline-success.png)
+![alt text](screenshots/image-2.png)
 
 ---
 
@@ -650,27 +638,8 @@ After pushing:
 
 ## GitHub Screenshot 2 — Security Stages
 
-Still on GitHub:
-
-1. Open the successful workflow run.
-2. Open **Complete DevSecOps Pipeline**.
-3. Capture the section containing the security steps.
-
-It should show successful steps for:
-
-```text
-Unit Tests
-SAST - CodeQL
-SCA - Dependency Scan
-Secret Scan
-Build Docker Image
-Container Image Scan - Trivy
-Security Gate
-```
-
-**Screenshot:** Take a GitHub screenshot with these steps showing green check marks.
-
-> ![Security Checks](screenshots/github-security-checks.png)
+![alt text](screenshots/image-3.png)
+![alt text](screenshots/image-4.png)
 
 ---
 
@@ -678,27 +647,7 @@ Security Gate
 
 ## GitHub Screenshot 3 — GHCR Package
 
-**This screenshot is also from GitHub.**
-
-After the successful pipeline:
-
-1. Open your repository on GitHub.
-2. Look for **Packages** on the repository/profile page.
-3. Open the `l17-devsecops` package.
-
-If it is not shown directly on the repository page:
-
-```text
-GitHub Profile
-→ Packages
-→ l17-devsecops
-```
-
-You should see the container package created by the workflow.
-
-**Screenshot:** Take one screenshot showing the `l17-devsecops` package/image.
-
-> ![Container Registry](screenshots/github-container-registry.png)
+![alt text](screenshots/image-5.png)
 
 ---
 
@@ -706,30 +655,7 @@ You should see the container package created by the workflow.
 
 ## GitHub Screenshot 4 — Kubernetes Deployment
 
-From the same successful Actions job, scroll near the bottom.
-
-Capture these successful steps:
-
-```text
-Create Kubernetes Cluster
-Load Scanned Image into Kubernetes
-Deploy to Kubernetes
-Verify Kubernetes Deployment
-Test Deployed Application
-```
-
-Expand **Verify Kubernetes Deployment** or **Test Deployed Application** so the screenshot shows:
-
-```text
-2 running Pods
-Deployment available
-Service created
-healthy application response
-```
-
-**Screenshot:** This is from **GitHub Actions job logs**, not your local terminal.
-
-> ![Kubernetes Deployment](screenshots/github-kubernetes-deployment.png)
+![alt text](screenshots/image-6.png)
 
 ---
 
@@ -796,12 +722,6 @@ The final pipeline automatically checks the application, dependencies, secrets a
 ---
 
 # Cleanup After Lecture 17
-
-The Kubernetes cluster created by GitHub Actions is temporary and is automatically destroyed with the GitHub-hosted runner, so **there is no local Kubernetes cleanup required**.
-
-Do **not** delete the GHCR package because it is useful evidence for the assignment.
-
-Run this local cleanup block after taking your terminal screenshot:
 
 ```bash
 echo "=== LECTURE 17 LOCAL CLEANUP ==="
