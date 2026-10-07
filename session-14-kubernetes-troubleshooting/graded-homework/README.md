@@ -40,8 +40,8 @@ cat /tmp/get-demo-metrics.txt
 ```
 
 **Screenshot:**
-> ![alt text](image.png) 
-> ![alt text](image-1.png)
+> ![alt text](screenshots/image.png) 
+> ![alt text](screenshots/image-1.png)
 
 ---
 
@@ -90,8 +90,8 @@ kubectl logs crash-demo
 ```
 
 **Screenshot:** 
-> ![alt text](image-2.png)
-> ![alt text](image-3.png)
+> ![alt text](screenshots/image-2.png)
+> ![alt text](screenshots/image-3.png)
 
 ---
 
@@ -134,7 +134,7 @@ kubectl get pod image-demo
 ```
 
 **Screenshot:**
-> ![alt text](image-4.png)
+> ![alt text](screenshots/image-4.png)
 
 ---
 
@@ -180,7 +180,7 @@ kubectl get pod pending-demo
 ```
 
 **Screenshot:**
-> ![alt text](image-5.png)
+> ![alt text](screenshots/image-5.png)
 
 ---
 
@@ -224,8 +224,8 @@ kubectl get endpoints web-service
 ```
 
 **Screenshot:** 
-> ![alt text](image-6.png)
-> ![alt text](image-7.png)
+> ![alt text](screenshots/image-6.png)
+> ![alt text](screenshots/image-7.png)
 
 ---
 
@@ -257,8 +257,8 @@ kubectl logs -n kube-system -l k8s-app=kube-dns --tail=10
 ```
 
 **Screenshot:**
-> ![alt text](image-8.png)
-> ![alt text](image-9.png)
+> ![alt text](screenshots/image-8.png)
+> ![alt text](screenshots/image-9.png)
 
 ---
 
@@ -297,7 +297,7 @@ kubectl get pods -l app=troubleshooting-app --show-labels
 ```
 
 **Screenshot:**
-> ![alt text](image-10.png)
+> ![alt text](screenshots/image-10.png)
 
 ---
 
@@ -336,7 +336,7 @@ kubectl get pod project-broken-pod
 ```
 
 **Screenshot:**
-> ![alt text](image-11.png)
+> ![alt text](screenshots/image-11.png)
 
 **Answers:**
 
@@ -393,8 +393,8 @@ kubectl get endpoints troubleshooting-service
 ```
 
 **Screenshot:**
-> ![alt text](image-12.png)
-> ![alt text](image-13.png)
+> ![alt text](screenshots/image-12.png)
+> ![alt text](screenshots/image-13.png)
 
 ---
 
