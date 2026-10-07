@@ -1,0 +1,121 @@
+name: Lecture 16 CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - L16_GitAct
+    paths:
+      - "session-16-github-actions/session-16-github-actions/graded-homework/cicd-demo/**"
+      - ".github/workflows/l16-cicd.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test Application
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        working-directory: session-16-github-actions/session-16-github-actions/graded-homework/cicd-demo
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests
+        working-directory: session-16-github-actions/session-16-github-actions/graded-homework/cicd-demo
+        run: pytest -v
+
+  security-check:
+    name: Security Check
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v6
+
+      - name: Verify GitHub Actions secret
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          test -n "$GH_TOKEN"
+          echo "GITHUB_TOKEN is available securely."
+
+      - name: Check for sensitive files
+        working-directory: session-16-github-actions/session-16-github-actions/graded-homework/cicd-demo
+        run: |
+          if find . -type f \( -name ".env" -o -name "*.pem" -o -name "*.key" \) | grep -q .; then
+            echo "Sensitive file found."
+            exit 1
+          fi
+          echo "No common sensitive files found."
+
+  build:
+    name: Build Application
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v6
+
+      - name: Build application
+        working-directory: session-16-github-actions/session-16-github-actions/graded-homework/cicd-demo
+        run: |
+          chmod +x build.sh
+          ./build.sh
+
+      - name: Show build output
+        working-directory: session-16-github-actions/session-16-github-actions/graded-homework/cicd-demo
+        run: cat build/build-info.txt
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: calculator-build
+          path: session-16-github-actions/session-16-github-actions/graded-homework/cicd-demo/build/
+
+  delivery:
+    name: CD - Package Docker Image
+    needs:
+      - build
+      - security-check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v6
+
+      - name: Build Docker image
+        working-directory: session-16-github-actions/session-16-github-actions/graded-homework/cicd-demo
+        run: |
+          docker build -t l16-calculator:${GITHUB_SHA} .
+
+      - name: Test Docker image
+        run: |
+          docker run --rm l16-calculator:${GITHUB_SHA} \
+            python -c "from app.calculator import add, divide; assert add(10,5) == 15; assert divide(10,5) == 2; print('Docker smoke test passed')"
+
+      - name: Package Docker image
+        working-directory: session-16-github-actions/session-16-github-actions/graded-homework/cicd-demo
+        run: |
+          mkdir -p dist
+          docker save l16-calculator:${GITHUB_SHA} | gzip > dist/l16-calculator-image.tar.gz
+          ls -lh dist/
+
+      - name: Upload Docker delivery artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: calculator-docker-image
+          path: session-16-github-actions/session-16-github-actions/graded-homework/cicd-demo/dist/l16-calculator-image.tar.gz
